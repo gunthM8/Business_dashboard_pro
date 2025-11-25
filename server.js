@@ -174,13 +174,15 @@ app.post('/api/metrics', requireLogin, async (req, res) => {
   }
 });
 
-   //STATIC FALLBACK (REQUIRED FOR RENDER)
-app.get("*", (req, res) => {
+// Serve static files (HTML, CSS, JS)
+app.use(express.static(__dirname));
+
+// Fallback route ONLY for non-file paths
+app.get(/^\/(?!.*\.).*$/, (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // START SERVER
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
