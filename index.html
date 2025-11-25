@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Home - Business Dashboard Pro</title>
+  <link href="stylesheets/HomeP-styles.css" rel="stylesheet">
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <h2>Dashboard</h2>
+      <a href="index.html">Home</a>
+      <a href="Financial-Dashboard.html">Finance</a>
+      <a href="Business-Analytics-Dashboard.html">Analytics</a>
+      <a href="All-Transactions.html">Transactions</a>
+      <a href="Reports.html">Reports</a>
+      <a href="#" id="logoutBtn" style="margin-top:20px; color:#ffdddd;">Logout</a>
+    </nav>
+    <main class="content">
+
+      <header>
+        <h1>Welcome to Your Dashboard</h1>
+        <p>Your personal financial hub — track everything in one place.</p>
+      </header>
+
+      <div class="intro">
+        <p>
+          This dashboard helps you manage your business finances with ease.  
+          Track income, expenses, generate reports, and view your analytics — all personalized for your account.
+        </p>
+
+        <a href="Financial-Dashboard.html" class="button">View Financial Dashboard</a>
+        <a href="Add-Transaction.html" class="button">Add New Transaction</a>
+      </div>
+
+      <footer>
+        <p>© 2025 Business Dashboard Pro</p>
+      </footer>
+
+    </main>
+  </div>
+
+<script>
+const API_URL = "https://mybizdashboard.onrender.com/api";
+async function checkSession() {
+  try {
+    const res = await fetch(`${API_URL}/metrics/latest`, {
+      method: "GET",
+      credentials: "include"
+    });
+
+    if (res.status === 401) {
+      window.location.href = "Login.html";
+    }
+  } catch (err) {
+    console.error("Session check failed", err);
+    window.location.href = "Login.html";
+  }
+}
+
+checkSession();
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  try {
+    const res = await fetch(`${API_URL}/logout`, {
+      method: "POST",
+      credentials: "include"
+    });
+
+    window.location.href = "Login.html";
+  } catch (err) {
+    console.error("Logout failed", err);
+  }
+});
+</script>
+</body>
+</html>

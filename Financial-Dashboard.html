@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Dashboard</title>
+  <link href="stylesheets/financialStyle.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="layout">
+
+    <nav class="sidebar">
+      <h2>Dashboard</h2>
+      <a href="index.html">Home</a>
+      <a href="Financial-Dashboard.html">Finance</a>
+      <a href="Business-Analytics-Dashboard.html">Analytics</a>
+      <a href="All-Transactions.html">Transactions</a>
+      <a href="Reports.html">Reports</a>
+      <a href="#" id="logoutBtn" style="margin-top:20px; color:#ffdddd;">Logout</a>
+    </nav>
+
+    <main class="content">
+      <header>
+        <h1>Financial Overview</h1>
+        <p>Your personalized business financial dashboard</p>
+        <a href="Add-Transaction.html">+ Add New Transaction</a>
+      </header>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Total Sales (30 Days)</h3>
+          <h2 id="totalSales">$0</h2>
+        </div>
+
+        <div class="card">
+          <h3>Total Expenses (30 Days)</h3>
+          <h2 id="totalExpenses">$0</h2>
+        </div>
+
+        <div class="card">
+          <h3>Net Profit (30 Days)</h3>
+          <h2 id="netProfit">$0</h2>
+        </div>
+      </div>
+
+      <!-- Recent Transactions Table -->
+      <h2 style="margin-top:35px;">Recent Transactions</h2>
+      <div id="transactionsContainer"></div>
+
+    </main>
+  </div>
+
+  <script>
+const API_URL = "https://mybizdashboard.onrender.com/api";
+
+    async function checkSession() {
+      try {
+        const res = await fetch(`${API_URL}/transactions/totals?days=30`, {
+          method: "GET",
+          credentials: "include"
+        });
+
+        if (res.status === 401) {
+          window.location.href = "Login.html";
+        }
+      } catch (err) {
+        console.error("Session check failed:", err);
+        window.location.href = "Login.html";
+      }
+    }
+    checkSession();
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await fetch(`${API_URL}/logout`, {
+        method: "POST",
+        credentials: "include"
+      });
+
+      window.location.href = "Login.html";
+    });
+
+    async function loadTotals() {
+      try {
+        const response = await fetch(`${API_URL}/transactions/totals?days=30`, {
+          credentials: "include"
+        });
+        const data = await response.json();
+
+        document.getElementById("totalSales").textContent =
+          `$${data.total_sales?.toLocaleString() || "0"}`;
+        document.getElementById("totalExpenses").textContent =
+          `$${data.total_expenses?.toLocaleString() || "0"}`;
+        document.getElementById("netProfit").textContent =
+          `$${data.net_profit?.toLocaleString() || "0"}`;
+      } catch (error) {
+        console.error("Error loading totals:", error);
+      }
+    }
+    async function loadTransactions() {
+      try {
+        const res = await fetch(`${API_URL}/transactions/recent?limit=10`, {
+          credentials: "include"
+        });
+        const transactions = await res.json();
+
+        const container = document.getElementById("transactionsContainer");
+
+        if (!transactions.length) {
+          container.innerHTML = "<p>No transactions found.</p>";
+          return;
+        }
+        let tableHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        transactions.forEach(t => {
+          const date = new Date(t.transaction_date).toLocaleDateString("en-US");
+          const color = t.transaction_type === "Income" ? "green" : "red";
+
+          tableHTML += `
+            <tr>
+              <td>${date}</td>
+              <td>${t.description}</td>
+              <td>$${t.amount.toLocaleString()}</td>
+              <td style="color:${color}; font-weight:600;">${t.transaction_type}</td>
+              <td>${t.category || ""}</td>
+            </tr>
+          `;
+        });
+        tableHTML += `
+            </tbody>
+          </table>
+        `;
+        container.innerHTML = tableHTML;
+      } catch (error) {
+        console.error("Error loading recent transactions:", error);
+      }
+    }
+    window.addEventListener("DOMContentLoaded", () => {
+      loadTotals();
+      loadTransactions();
+    });
+  </script>
+</body>
+</html>

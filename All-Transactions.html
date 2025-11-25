@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Transactions</title>
+  <link href="stylesheets/stylesheet1.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="layout">
+
+    <nav class="sidebar">
+      <h2>Dashboard</h2>
+
+      <a href="index.html">Home</a>
+      <a href="Financial-Dashboard.html">Finance</a>
+      <a href="Business-Analytics-Dashboard.html">Analytics</a>
+      <a href="All-Transactions.html">Transactions</a>
+      <a href="Reports.html">Reports</a>
+
+      <a href="#" id="logoutBtn" style="margin-top:20px; color:#ffdddd;">Logout</a>
+    </nav>
+    <main class="content">
+
+      <h1>All Transactions</h1>
+      <p style="margin-bottom:20px; color:#5a6a73;">
+        View, search, and filter your complete transaction history.
+      </p>
+      <a href="Add-Transaction.html" class="button">+ Add Transaction</a>
+      <div class="filter-container">
+        <div class="filter-box">
+          <label>Search</label>
+          <input type="text" id="searchInput" placeholder="Search description, category, notes..." />
+        </div>
+
+        <div class="filter-box">
+          <label>Type</label>
+          <select id="typeFilter">
+            <option value="">All</option>
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+          </select>
+        </div>
+        <div class="filter-box">
+          <label>Start Date</label>
+          <input type="date" id="startDateFilter" />
+        </div>
+        <div class="filter-box">
+          <label>End Date</label>
+          <input type="date" id="endDateFilter" />
+        </div>
+        <button class="button filter-btn" id="applyFilters">Apply</button>
+      </div>
+
+      <div id="transactionsTable" style="margin-top:30px;"></div>
+
+    </main>
+  </div>
+
+  <script>
+const API_URL = "https://mybizdashboard.onrender.com/api";
+
+    async function checkSession() {
+      try {
+        const res = await fetch(`${API_URL}/transactions?limit=1`, {
+          credentials: "include"
+        });
+
+        if (res.status === 401) {
+          window.location.href = "Login.html";
+        }
+      } catch (err) {
+        window.location.href = "Login.html";
+      }
+    }
+
+    checkSession();
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await fetch(`${API_URL}/logout`, {
+        method: "POST",
+        credentials: "include"
+      });
+      window.location.href = "Login.html";
+    });
+
+    async function loadTransactions() {
+      const search = document.getElementById("searchInput").value;
+      const type = document.getElementById("typeFilter").value;
+      const start = document.getElementById("startDateFilter").value;
+      const end = document.getElementById("endDateFilter").value;
+
+      let url = `${API_URL}/transactions?`;
+
+      if (search) url += `search=${encodeURIComponent(search)}&`;
+      if (type) url += `type=${type}&`;
+      if (start) url += `start_date=${start}&`;
+      if (end) url += `end_date=${end}&`;
+
+      try {
+        const res = await fetch(url, { credentials: "include" });
+        const data = await res.json();
+
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        data.forEach(t => {
+          const date = new Date(t.transaction_date).toLocaleDateString("en-US");
+          const color = t.transaction_type === "Income" ? "green" : "red";
+
+          html += `
+            <tr>
+              <td>${date}</td>
+              <td>${t.description}</td>
+              <td>$${t.amount.toLocaleString()}</td>
+              <td style="color:${color}; font-weight:600;">${t.transaction_type}</td>
+              <td>${t.category || ""}</td>
+              <td>${t.notes || ""}</td>
+              <td>
+                <a href="Edit-Transaction.html?id=${t.transaction_id}" class="table-button">
+                  Edit
+                </a>
+              </td>
+            </tr>
+          `;
+        });
+        html += "</tbody></table>";
+        document.getElementById("transactionsTable").innerHTML = html;
+      } catch (err) {
+        console.error("Error loading transactions", err);
+      }
+    }
+    document.getElementById("applyFilters").addEventListener("click", loadTransactions);
+    window.addEventListener("DOMContentLoaded", loadTransactions);
+  </script>
+</body>
+</html>

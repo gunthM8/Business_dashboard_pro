@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #eef3f6;
+}
+
+.auth-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-card {
+  width: 360px;
+  background: #fff;
+  padding: 35px;
+  border-radius: 14px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 28px;
+  color: #1a2b3c;
+}
+
+.subtitle {
+  color: #687b85;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #354856;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #c8d3db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+button.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #0ea5a4;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button.btn-primary:hover {
+  background: #0b8c8a;
+}
+
+.switch-text {
+  text-align: center;
+  margin-top: 18px;
+  color: #5d6e78;
+}
+
+.switch-text a {
+  color: #0ea5a4;
+  font-weight: bold;
+}
+
+.message {
+  display: none;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.message.error {
+  background: #ffe5e5;
+  color: #c10000;
+}
+
+.message.success {
+  background: #e2ffe8;
+  color: #0c7c0c;
+}

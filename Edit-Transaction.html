@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Transaction</title>
+  <link href="stylesheets/Add-Transaction.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="form-container">
+    <h1>Edit Transaction</h1>
+    <p style="color:#5a6a73; margin-top:-10px;">
+      Modify the details of this transaction.
+    </p>
+    <div id="message" class="message"></div>
+    <form id="editForm">
+      <div class="form-row">
+        <label>Date *</label>
+        <input type="date" id="transaction_date" required />
+      </div>
+      <div class="form-row">
+        <label>Description *</label>
+        <input type="text" id="description" required />
+      </div>
+      <div class="form-row">
+        <label>Amount *</label>
+        <input type="number" id="amount" step="0.01" required />
+      </div>
+      <div class="form-row">
+        <label>Type *</label>
+        <select id="transaction_type" required>
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Category</label>
+        <input type="text" id="category" />
+      </div>
+      <div class="form-row">
+        <label>Notes</label>
+        <textarea id="notes"></textarea>
+      </div>
+      <button type="submit" class="btn-primary">Save Changes</button>
+      <a href="All-Transactions.html" class="btn-secondary">Cancel</a>
+    </form>
+  </div>
+  <script>
+    const API_URL = "https://mybizdashboard.onrender.com/api";
+    const params = new URLSearchParams(window.location.search);
+    const transactionId = params.get("id");
+
+    if (!transactionId) {
+      alert("Invalid transaction ID.");
+      window.location.href = "All-Transactions.html";
+    }
+
+    async function checkSession() {
+      try {
+        const res = await fetch(`${API_URL}/transactions?limit=1`, {
+          credentials: "include"
+        });
+
+        if (res.status === 401) {
+          window.location.href = "Login.html";
+        }
+      } catch (err) {
+        window.location.href = "Login.html";
+      }
+    }
+
+    checkSession();
+
+    async function loadTransaction() {
+      try {
+        const res = await fetch(`${API_URL}/transactions?id=${transactionId}`, {
+          credentials: "include"
+        });
+
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+          alert("Transaction not found.");
+          window.location.href = "All-Transactions.html";
+        }
+
+        const t = data.find(item => item.transaction_id == transactionId);
+
+        if (!t) {
+          alert("Transaction not found.");
+          window.location.href = "All-Transactions.html";
+        }
+
+        document.getElementById("transaction_date").value = t.transaction_date.split("T")[0];
+        document.getElementById("description").value = t.description;
+        document.getElementById("amount").value = t.amount;
+        document.getElementById("transaction_type").value = t.transaction_type;
+        document.getElementById("category").value = t.category || "";
+        document.getElementById("notes").value = t.notes || "";
+
+      } catch (err) {
+        console.error("Load error:", err);
+        alert("Unable to load transaction.");
+      }
+    }
+
+    loadTransaction();
+
+    document.getElementById("editForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const message = document.getElementById("message");
+      message.style.display = "none";
+
+      const transaction_date = document.getElementById("transaction_date").value;
+      const description = document.getElementById("description").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      const transaction_type = document.getElementById("transaction_type").value;
+      const category = document.getElementById("category").value;
+      const notes = document.getElementById("notes").value;
+
+      try {
+        const res = await fetch(`${API_URL}/transactions/${transactionId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            transaction_date,
+            description,
+            amount,
+            transaction_type,
+            category,
+            notes
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to update transaction");
+        message.textContent = "Transaction updated successfully!";
+        message.className = "message success";
+        message.style.display = "block";
+        setTimeout(() => {
+          window.location.href = "All-Transactions.html";
+        }, 1000);
+      } catch (err) {
+        message.textContent = err.message;
+        message.className = "message error";
+        message.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>

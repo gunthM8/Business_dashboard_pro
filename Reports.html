@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports</title>
+  <link href="stylesheets/stylesheet1.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <h2>Dashboard</h2>
+
+      <a href="index.html">Home</a>
+      <a href="Financial-Dashboard.html">Finance</a>
+      <a href="Business-Analytics-Dashboard.html">Analytics</a>
+      <a href="All-Transactions.html">Transactions</a>
+      <a href="Reports.html">Reports</a>
+
+      <a href="#" id="logoutBtn" style="margin-top:20px; color:#ffdddd;">Logout</a>
+    </nav>
+    <main class="content">
+
+      <h1>Business Reports</h1>
+      <p style="color:#5a6a73; margin-bottom:25px;">
+        View and export your business data. More report types will be added soon.
+      </p>
+
+      <div class="report-summary">
+        <div class="summary-box">
+          <h3>Total Income</h3>
+          <p id="totalIncome">$0</p>
+        </div>
+
+        <div class="summary-box">
+          <h3>Total Expenses</h3>
+          <p id="totalExpenses">$0</p>
+        </div>
+        <div class="summary-box">
+          <h3>Net Profit</h3>
+          <p id="netProfit">$0</p>
+        </div>
+      </div>
+      <div style="margin-top:25px;">
+        <button class="button" id="exportCSV">Export CSV</button>
+        <button class="button" id="exportPDF">Export PDF</button>
+      </div>
+      <h2 style="margin-top:35px;">Full Transaction Record</h2>
+      <div id="reportTable"></div>
+
+    </main>
+  </div>
+  <script>
+    const API_URL = "https://mybizdashboard.onrender.com/api";
+    async function checkSession() {
+      try {
+        const res = await fetch(`${API_URL}/transactions?limit=1`, {
+          credentials: "include"
+        });
+
+        if (res.status === 401) {
+          window.location.href = "Login.html";
+        }
+      } catch (err) {
+        window.location.href = "Login.html";
+      }
+    }
+
+    checkSession();
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await fetch(`${API_URL}/logout`, {
+        method: "POST",
+        credentials: "include"
+      });
+      window.location.href = "Login.html";
+    });
+    async function loadReportData() {
+      try {
+        const res = await fetch(`${API_URL}/transactions`, {
+          credentials: "include"
+        });
+        const transactions = await res.json();
+
+        let totalIncome = 0;
+        let totalExpenses = 0;
+
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        transactions.forEach(t => {
+          const date = new Date(t.transaction_date).toLocaleDateString("en-US");
+          if (t.transaction_type === "Income") totalIncome += t.amount;
+          if (t.transaction_type === "Expense") totalExpenses += t.amount;
+          html += `
+            <tr>
+              <td>${date}</td>
+              <td>${t.description}</td>
+              <td>${t.transaction_type}</td>
+              <td>$${t.amount.toLocaleString()}</td>
+              <td>${t.category || ""}</td>
+              <td>${t.notes || ""}</td>
+            </tr>
+          `;
+        });
+        html += "</tbody></table>";
+        document.getElementById("reportTable").innerHTML = html;
+        document.getElementById("totalIncome").textContent =
+          `$${totalIncome.toLocaleString()}`;
+        document.getElementById("totalExpenses").textContent =
+          `$${totalExpenses.toLocaleString()}`;
+        document.getElementById("netProfit").textContent =
+          `$${(totalIncome - totalExpenses).toLocaleString()}`;
+      } catch (err) {
+        console.error("Report load error", err);
+      }
+    }
+
+    loadReportData();
+    document.getElementById("exportCSV").addEventListener("click", async () => {
+      try {
+        const res = await fetch(`${API_URL}/transactions`, {
+          credentials: "include"
+        });
+        const data = await res.json();
+
+        let csv = "Date,Description,Type,Amount,Category,Notes\n";
+
+        data.forEach(t => {
+          csv += [
+            t.transaction_date.split("T")[0],
+            `"${t.description}"`,
+            t.transaction_type,
+            t.amount,
+            `"${t.category || ""}"`,
+            `"${t.notes || ""}"`
+          ].join(",") + "\n";
+        });
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Business_Report.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error("CSV export failed", err);
+      }
+    });
+    document.getElementById("exportPDF").addEventListener("click", () => {
+      alert("PDF export feature coming soon!");
+    });
+  </script>
+</body>
+</html>
