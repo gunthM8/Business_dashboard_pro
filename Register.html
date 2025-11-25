@@ -1,113 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Account - Business Dashboard Pro</title>
-
-  <link href="stylesheets/Auth.css" rel="stylesheet" />
+  <title>Create Account</title>
+  <link rel="stylesheet" href="stylesheets/Auth.css">
 </head>
-
 <body>
+
   <div class="auth-container">
     <div class="auth-card">
 
-      <h1>Create Account</h1>
-      <p class="subtitle">Sign up to access your personal dashboard</p>
+      <h2>Create Account</h2>
+      <p class="subtext">Sign up to access your personal dashboard</p>
 
-      <div id="message" class="message"></div>
+      <div id="errorBox" class="error-box" style="display:none;"></div>
 
       <form id="registerForm">
 
-        <div class="form-group">
-          <label>Full Name (optional)</label>
-          <input type="text" id="full_name" placeholder="Your name" />
-        </div>
+        <label>Full Name (optional)</label>
+        <input type="text" id="full_name" />
 
-        <div class="form-group">
-          <label>Email Address *</label>
-          <input type="email" id="email" required placeholder="you@example.com" />
-        </div>
+        <label>Email Address *</label>
+        <input type="email" id="email" required />
 
-        <div class="form-group">
-          <label>Password *</label>
-          <input type="password" id="password" required placeholder="At least 6 characters" />
-        </div>
+        <label>Password *</label>
+        <input type="password" id="password" required />
 
-        <div class="form-group">
-          <label>Confirm Password *</label>
-          <input type="password" id="confirmPassword" required placeholder="Re-enter password" />
-        </div>
+        <label>Confirm Password *</label>
+        <input type="password" id="confirmPassword" required />
 
-        <button class="btn-primary" type="submit">Create Account</button>
+        <button type="submit" class="auth-btn">Create Account</button>
       </form>
 
-      <p class="switch-text">
-        Already have an account?
-        <a href="login.html">Sign in</a>
-      </p>
-
+      <p class="switch-text">Already have an account? <a href="login.html">Sign in</a></p>
     </div>
   </div>
 
-  <script>
-const API_URL = "https://mybizdashboard.onrender.com/api";
+<script>
 
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+  //  THE ONLY CORRECT API URL
+ 
+  const API_URL = "https://bizdashboardpro.com/api";
 
-      const full_name = document.getElementById("full_name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const message = document.getElementById("message");
-      message.style.display = "none";
+    const full_name = document.getElementById("full_name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const confirm = document.getElementById("confirmPassword").value.trim();
+    const errorBox = document.getElementById("errorBox");
 
-      // --- Validation ---
-      if (password !== confirmPassword) {
-        message.textContent = "Passwords do not match.";
-        message.className = "message error";
-        message.style.display = "block";
+    errorBox.style.display = "none";
+
+    if (password !== confirm) {
+      errorBox.style.display = "block";
+      errorBox.textContent = "Passwords do not match.";
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ full_name, email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        errorBox.style.display = "block";
+        errorBox.textContent = data.error || "Registration failed.";
         return;
       }
 
-      if (password.length < 6) {
-        message.textContent = "Password must be at least 6 characters.";
-        message.className = "message error";
-        message.style.display = "block";
-        return;
-      }
+      window.location.href = "login.html";
 
-      try {
-        const res = await fetch(`${API_URL}/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ full_name, email, password })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.error || "Registration failed");
-
-        message.textContent = "Account created! Redirecting to login...";
-        message.className = "message success";
-        message.style.display = "block";
-
-        setTimeout(() => {
-          window.location.href = "login.html";
-        }, 1000);
-
-      } catch (err) {
-        message.textContent = err.message;
-        message.className = "message error";
-        message.style.display = "block";
-      }
-
-    });
-  </script>
+    } catch (err) {
+      errorBox.style.display = "block";
+      errorBox.textContent = "Network error. Please try again.";
+    }
+  });
+</script>
 
 </body>
-
 </html>
