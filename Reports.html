@@ -59,10 +59,10 @@
         });
 
         if (res.status === 401) {
-          window.location.href = "Login.html";
+          window.location.href = "login.html";
         }
       } catch (err) {
-        window.location.href = "Login.html";
+        window.location.href = "login.html";
       }
     }
 
@@ -72,7 +72,7 @@
         method: "POST",
         credentials: "include"
       });
-      window.location.href = "Login.html";
+      window.location.href = "login.html";
     });
     async function loadReportData() {
       try {

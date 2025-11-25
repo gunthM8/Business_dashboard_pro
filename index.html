@@ -51,11 +51,11 @@ async function checkSession() {
     });
 
     if (res.status === 401) {
-      window.location.href = "Login.html";
+      window.location.href = "login.html";
     }
   } catch (err) {
     console.error("Session check failed", err);
-    window.location.href = "Login.html";
+    window.location.href = "login.html";
   }
 }
 
@@ -68,7 +68,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
       credentials: "include"
     });
 
-    window.location.href = "Login.html";
+    window.location.href = "login.html";
   } catch (err) {
     console.error("Logout failed", err);
   }
