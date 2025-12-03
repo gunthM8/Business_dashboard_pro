@@ -64,11 +64,11 @@ const API_URL = "https://businessdashboardpro-production.up.railway.app/api";
           window.location.href = "login.html";
         }
       } catch (err) {
-        window.location.href = ",login.html";
+        window.location.href = "login.html";
       }
     }
 
-    //checkSession();
+    checkSession();
 
     document.getElementById("transactionForm").addEventListener("submit", async (e) => {
       e.preventDefault();
