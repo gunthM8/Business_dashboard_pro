@@ -17,7 +17,7 @@ app.use(cors({
     'https://business-dashboard-pro.onrender.com',
     'https://bizdashboardpro.com',
     'https://www.bizdashboardpro.com',
-    'businessdashboardpro-production.up.railway.app'
+    'https://businessdashboardpro-production.up.railway.app'
   ],
   credentials: true
 }));
