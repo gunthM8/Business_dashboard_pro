@@ -16,7 +16,8 @@ app.use(cors({
     'http://localhost:3000',
     'https://business-dashboard-pro.onrender.com',
     'https://bizdashboardpro.com',
-    'https://www.bizdashboardpro.com'
+    'https://www.bizdashboardpro.com',
+    'businessdashboardpro-production.up.railway.app'
   ],
   credentials: true
 }));
