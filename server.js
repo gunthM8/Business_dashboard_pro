@@ -68,13 +68,14 @@ app.use(
   session({
     key: 'connect.sid',
     secret: process.env.SESSION_SECRET || "AjnjabiibnijbAiNUHInIBi",
-    store: sessionStore, 
+    store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: true,
+      sameSite: 'lax',
       maxAge: 1000 * 60 * 60
     }
   })
