@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,7 +29,9 @@ app.use(express.json());
 // Session cookies
 app.use(
   session({
+    key: 'connect.sid',
     secret: process.env.SESSION_SECRET || "AjnjabiibnijbAiNUHInIBi",
+    store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -61,6 +64,22 @@ pool.getConnection((err, connection) => {
     connection.release();
   }
 });
+
+// Create MySQL session store
+const sessionStore = new MySQLStore({
+  clearExpired: true,
+  checkExpirationInterval: 900000,
+  expiration: 3600000,
+  createDatabaseTable: true,
+  schema: {
+    tableName: 'sessions',
+    columnNames: {
+      session_id: 'session_id',
+      expires: 'expires',
+      data: 'data'
+    }
+  }
+}, pool);
 
 // LOGIN REQUIRED middleware
 function requireLogin(req, res, next) {
@@ -104,6 +123,8 @@ app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log("Login attempt for:", email);
+
     const [rows] = await promisePool.query(
       "SELECT * FROM users WHERE email = ?",
       [email]
@@ -117,7 +138,20 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
 
     req.session.userId = rows[0].user_id;
-    res.json({ success: true });
+    
+    console.log("✅ Login successful!");
+    console.log("User ID:", rows[0].user_id);
+    console.log("Session ID:", req.session.id);
+    
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({ error: "Session save failed" });
+      }
+      console.log("✅ Session saved to database");
+      res.json({ success: true });
+    });
+    
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Login failed" });
