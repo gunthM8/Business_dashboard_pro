@@ -51,7 +51,7 @@
     </main>
   </div>
   <script>
-  const API_URL = "https://businessdashboardpro-production.up.railway.app/api";
+const API_URL = "https://businessdashboardpro-production.up.railway.app/api";
     async function checkSession() {
       try {
         const res = await fetch(`${API_URL}/transactions?limit=1`, {
@@ -101,14 +101,15 @@
 
         transactions.forEach(t => {
           const date = new Date(t.transaction_date).toLocaleDateString("en-US");
-          if (t.transaction_type === "Income") totalIncome += t.amount;
-          if (t.transaction_type === "Expense") totalExpenses += t.amount;
+          const amount = parseFloat(t.amount);
+          if (t.transaction_type === "Income") totalIncome += amount;
+          if (t.transaction_type === "Expense") totalExpenses += amount;
           html += `
             <tr>
               <td>${date}</td>
               <td>${t.description}</td>
               <td>${t.transaction_type}</td>
-              <td>$${t.amount.toLocaleString()}</td>
+              <td>$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
               <td>${t.category || ""}</td>
               <td>${t.notes || ""}</td>
             </tr>
@@ -117,11 +118,11 @@
         html += "</tbody></table>";
         document.getElementById("reportTable").innerHTML = html;
         document.getElementById("totalIncome").textContent =
-          `$${totalIncome.toLocaleString()}`;
+          `$${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById("totalExpenses").textContent =
-          `$${totalExpenses.toLocaleString()}`;
+          `$${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById("netProfit").textContent =
-          `$${(totalIncome - totalExpenses).toLocaleString()}`;
+          `$${(totalIncome - totalExpenses).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       } catch (err) {
         console.error("Report load error", err);
       }
