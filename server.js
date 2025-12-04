@@ -299,7 +299,14 @@ app.get("/api/sales/monthly", requireLogin, async (req, res) => {
 
   try {
     const [rows] = await promisePool.query(
-      "SELECT month_name, sales_amount, month FROM monthly_sales WHERE user_id = ? AND year = ? ORDER BY month",
+      `SELECT 
+        MONTHNAME(transaction_date) as month_name,
+        MONTH(transaction_date) as month,
+        SUM(CASE WHEN transaction_type = 'Income' THEN amount ELSE 0 END) as sales_amount
+      FROM transactions 
+      WHERE user_id = ? AND YEAR(transaction_date) = ?
+      GROUP BY MONTH(transaction_date), MONTHNAME(transaction_date)
+      ORDER BY MONTH(transaction_date)`,
       [userId, year]
     );
     res.json(rows);
