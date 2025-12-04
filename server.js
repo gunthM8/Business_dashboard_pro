@@ -11,7 +11,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS – allow all front-end URLs
+// CORS
 app.use(cors({
   origin: [
     'http://localhost:3000',
@@ -24,24 +24,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
-
-// Session cookies
-app.use(
-  session({
-    key: 'connect.sid',
-    secret: process.env.SESSION_SECRET || "AjnjabiibnijbAiNUHInIBi",
-    store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 1000 * 60 * 60
-    }
-  })
-);
 
 // MYSQL (Railway)
 const pool = mysql.createPool({
@@ -80,6 +62,23 @@ const sessionStore = new MySQLStore({
     }
   }
 }, pool);
+
+// Session cookies
+app.use(
+  session({
+    key: 'connect.sid',
+    secret: process.env.SESSION_SECRET || "AjnjabiibnijbAiNUHInIBi",
+    store: sessionStore, 
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 1000 * 60 * 60
+    }
+  })
+);
 
 // LOGIN REQUIRED middleware
 function requireLogin(req, res, next) {
