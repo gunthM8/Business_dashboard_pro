@@ -58,7 +58,7 @@ const API_URL = "https://businessdashboardpro-production.up.railway.app/api";
 
     async function checkSession() {
       try {
-        const res = await fetch(`${API_URL}/metrics/latest`, {
+        const res = await fetch(`${API_URL}/transactions/totals`, {
           credentials: "include"
         });
 
@@ -81,7 +81,7 @@ const API_URL = "https://businessdashboardpro-production.up.railway.app/api";
 
     async function loadKPIs() {
       try {
-        const res = await fetch(`${API_URL}/metrics/latest`, {
+        const res = await fetch(`${API_URL}/transactions/totals?days=365`, {
           credentials: "include"
         });
         const data = await res.json();
